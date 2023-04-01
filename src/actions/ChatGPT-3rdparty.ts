@@ -5,7 +5,7 @@ import { DeviceType } from 'aitum.js/lib/enums';
 
 /*********** CONFIG ***********/
 // The custom code action name
-const name: string = 'Chat GPT';
+const name: string = 'Chat GPT (/w Official Package)';
 
 // The custom code inputs
 const inputs: ICCActionInputs = {

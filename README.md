@@ -75,6 +75,8 @@ This example only checks that the rule contains the `!ask` command, however, you
 
 ### Actions
 
+NOTE: there are two actions included, one uses the official OpenAI npm package and one uses a 3rd party package; both do the same thing in slightly different ways.
+
 The PoC uses two parameters:
 
  - **Question**: the question posed to ChatGPT
