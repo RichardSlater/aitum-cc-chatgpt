@@ -16,8 +16,11 @@ const inputs: ICCActionInputs = {
 // The code executed.
 async function method(inputs: { [key: string]: number | string | boolean | string[] }) {
   const lib = AitumCC.get().getAitumJS();
+
+  // Fetch the Aitum Device representing Twitch
   const twitchDevices = await lib.aitum.getDevices(DeviceType.TWITCH);
 
+  // GUARD CLAUSE #1: fail fast if the Aitum Device is not found for any reason.
   if (twitchDevices === undefined || twitchDevices.length == 0) {
     console.error("Aitum Twitch Device undefined.");
     return;
@@ -25,38 +28,52 @@ async function method(inputs: { [key: string]: number | string | boolean | strin
 
   const twitch = twitchDevices[0];
 
+  // GUARD CLAUSE #2: exit if the OPEN_API_KEY isn't found in the environment.
   if (process.env.OPENAI_API_KEY == undefined) {
-    console.error("OPENAI_API_KEY not defined, aborting.");
+    console.error("OPENAI_API_KEY not defined, aborting - try adding it to settings.env.");
     return;
   }
 
+  // cast the question to string, as we know it's required.
   var question = inputs.question as string;
 
+  // check if the command was specified
   if (inputs.command || inputs.command != '') {
+
+    // this will log messages if !ask is used somewhere other than at the beginning of the line
+    // so this will filter out anyone typing "try using !ask to ask ChatGPT a question"
     if (!question.startsWith(inputs.command as string)) {
       console.log("Custom Code executed, but did not match the command in " + question);
       console.log("For performance reasons it is recommended that a Check for the command is added in Aitum.");
       return;
     }
+
+    // remove the command from the question
     question = question.replace(inputs.command + ' ', '');
   }
 
+  // the "chatgpt" package is an ESM so we have to do some "magic" to get it to import
+  // otherwise we get Error [ERR_REQUIRE_ESM]: require() of ES Module
   const importDynamic = new Function( 'modulePath', 'return import(modulePath)', );
   const { ChatGPTAPI } = await importDynamic("chatgpt");
   const api = new ChatGPTAPI({ apiKey: process.env.OPENAI_API_KEY })
 
+  // finally we send the message to ChatGPTs API
   const res = await api.sendMessage(question);
 
+  // check the response is defined
   if (res == undefined) {
     console.error("ChatGPT response was undefined, IDK what happened.");
     return;
   }
 
+  // and that the text is not null or empty
   if (res.text === undefined || res.text === '') {
     console.error("ChatGPT text was undefined or empty, IDK what happened.");
     return;
   }
 
+  // send the message on Twitch
   await twitch.sendMessage(res.text);
 }
 
