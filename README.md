@@ -1,12 +1,9 @@
-# aitum-cc
-Aitum's Custom Code Wrapper
+# aitum-cc-chatgpt
+Aitum's Custom Code Wrapper for Chat GPT
 
-## To non-developers / users looking to learn
-The following parts will require an IDE (dev-speak for a text editor) for you to have an easy time.
+An example of how to integrate Aitum with Chat GPT to provide a `!ask` command in chat, you can also use it to display responses in your OBS Overlay!
 
-We recommend using [Visual Studio Code](https://code.visualstudio.com/) as it's a free and decent IDE to get started with.
-
-If you want to take the time and understand the tooling that is commonly used in the dev world, take a look at [Facehair4000's Beginner's Guide to Software Engineering and Web Development](https://www.youtube.com/watch?v=Wt47gSihb5s&list=PLJjxqjPti-LfbLhTs-XSNecyqBOtRB0fS), which is an excellent series to get you started.
+![Screenshot of ChatGPT responding in Chat](./img/chat.png)
 
 ## Installation
 Make sure you have NodeJS installed on your computer, which you can install from [here](https://nodejs.org/en/).
@@ -46,111 +43,45 @@ npm run start
 ```
 
 The wrapper will automatically find the Aitum master on your network and attempt to connect.
+
 If there are any issues connecting, they will be logged to your terminal.
 
-## Custom Actions
+### Getting Started with ChatGPT
 
-Included by default is a Dummy Action, which you can edit or duplicate.
+You will need an OpenAI API Key from here: https://platform.openai.com/account/api-keys
 
-An action is split up into 3 parts: name, inputs and method.
-It is advised against changing the format of how things are laid out in an effort to keep custom actions shared in the community to a level of consistency, to prevent unneeded extra work when someone provides support.
+This needs to be added in
 
-### Name
-This is your action's name, change the value to whatever you wish for it to display within the Aitum App.
-
-### Inputs
-This is your action's inputs.
-
-If you don't need inputs, set the value of inputs to an empty object (`{}`).
-
-There are currently 4 different possible input types:
-
-#### StringInput
-
-For simple text inputs.
-
-Example:
-
-```ts
-new StringInput('What is your name?', validation)
+```
+AITUM_CC_ID=...
+AITUM_CC_HOST=...
+API_KEY=...
+OPENAI_API_KEY=[OPENAI API KEY Goes Here]
 ```
 
-##### Validation options:
-```ts
-{
-  required: boolean;
-  minLength?: number;
-  maxLength?: number;
-}
-```
+## Creating the rule
 
+Any trigger that supports some form of text input exposed as an Aitum variable could be used. In this example, I have used a **Chat Message** from the **Twitch** device.
 
-#### BooleanInput
+### Trigger
 
-For boolean (true/false) inputs.
+![Aitum Trigger](./img/trigger.png)
 
-Example:
+### Checks
 
-```ts
-new BooleanInput('Are you a fun person?', validation)
-```
+This example only checks that the rule contains the `!ask` command, however, you can add other checks to require VIP or Broadcaster roles.
 
-##### Validation options:
-```ts
-{
-  required: boolean;
-}
-```
+![Aitum Trigger](./img/checks.png)
 
+### Actions
 
-#### IntInput
-For integer (whole numbers) inputs.
+The PoC uses two parameters:
 
-Example:
+ - **Question**: the question posed to ChatGPT
+ - **Command**: command used in Checks, this will be stripped out from the beginning of the message
 
-```ts
-new IntInput('How old are you?', validation)
-```
+![Aitum Trigger](./img/actions.png)
 
-##### Validation options:
-```ts
-{
-  required: boolean;
-  minValue?: number;
-  maxValue?: number;
-}
-```
+## Conversational Interface
 
-
-#### FloatInput
-For floating point (decimal numbers) inputs.
-
-Example:
-
-```ts
-new FloatInput('Volume', validation)
-```
-
-##### Validation options:
-```ts
-{
-  required: boolean;
-  minValue?: number;
-  maxValue?: number;
-}
-```
-
-### Method
-This is where the fun stuff happens. Write your code in here!
-
-Passed down to this method is a variable called `inputs` which includes the data sent to the action from within the Aitum App.
-
-For interaction with Aitum's API, you can utilise [Aitum.JS](https://www.npmjs.com/package/aitum.js) (already installed).
-
-### Registering an action
-
-Registering actions is automatic, so long as you have a `.ts` (TypeScript) file within the `/actions/` directory that adheres to the specs above.
-
-### Warranty
-Aitum takes no responsibility for any damage caused by using Aitum, Aitum CC or any other libraries.
-All custom code used is with the understanding that the user knows what they are running and takes full responsibility any code ran and its outcomes.
+The PoC could be extended further with a dictionary of previous responses to allow individual chatters to have a conversation with ChatGPT.
